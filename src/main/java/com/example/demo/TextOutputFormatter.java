@@ -5,6 +5,8 @@ import java.util.stream.Collectors;
 
 public class TextOutputFormatter implements OutputFormatter{
 
+    private int capacity = 0;
+
     @Override
     public void print(List<ScheduleBucket> bucket) {
         if (bucket.isEmpty()) {
@@ -14,6 +16,11 @@ public class TextOutputFormatter implements OutputFormatter{
         for (ScheduleBucket b : bucket) {
             printBucket(b);
         }
+    }
+
+    @Override
+    public void setCapacity(int capacity) {
+        this.capacity = capacity;
     }
 
     private void printBucket(ScheduleBucket bucket) {

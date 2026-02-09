@@ -22,7 +22,11 @@ public class CallOrchestrator {
     public ScheduleBucket calculateSchedule(int hour) {
         List<AllocationRequest> requests = storage.fetchInterMediateData(hour);
         if (requests.isEmpty()) {
-            return new ScheduleBucket(hour, 0, java.util.Collections.emptyMap());
+            return new ScheduleBucket(
+                hour,
+                0,
+                java.util.Collections.emptyMap(),
+                java.util.Collections.emptyMap());
         }
 
         Map<String, Integer> allocations = new LinkedHashMap<>();
@@ -34,12 +38,17 @@ public class CallOrchestrator {
                 allocations.merge(request.customer(), request.agents(), Integer::sum);
                 totalAgents += request.agents();
             }
-            return new ScheduleBucket(hour, totalAgents, allocations);
+            return new ScheduleBucket(hour, totalAgents, allocations, allocations);
         }
         // 1. Group all requests for this hour by priority
         Map<Integer, List<AllocationRequest>> priorityGroups = new TreeMap<>();
+        Map<String, Integer> demands = new LinkedHashMap<>();
         for (AllocationRequest request : requests) {
             priorityGroups.computeIfAbsent(request.priority(), k -> new ArrayList<>()).add(request);
+            demands.merge(request.customer(), request.agents(), Integer::sum);
+        }
+
+        if (priorityGroups.isEmpty()) {
         }
         int remainingCapacty = capacity;
         int totalAllocated = 0;
@@ -85,7 +94,7 @@ public class CallOrchestrator {
             }
         }
 
-        return new ScheduleBucket(hour, totalAllocated, allocations);
+        return new ScheduleBucket(hour, totalAllocated, allocations, demands);
     }
 
 }

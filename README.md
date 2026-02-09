@@ -9,7 +9,7 @@ The Control Plane Scheduler reads customer call data from a CSV file, processes 
 *   **Utilization Adjustments**: Scale agent efficiency.
 *   **Capacity Constraints**: Limit the total number of agents available per hour.
 *   **Priority-Based Allocation**: Prioritize specific customers when capacity is limited.
-*   **Flexible Output**: Generate schedules in Text or JSON format.
+*   **Flexible Output**: Generate schedules in Text, JSON, or UI format.
 *   **Scalable Processing**: Uses an intermediate storage mechanism to handle large datasets efficiently.
 
 ## Prerequisites
@@ -39,7 +39,7 @@ java -cp target/classes:target/dependency/* com.example.demo.Main [OPTIONS]
 | :--- | :--- | :--- |
 | `--input` | `test.csv` | Path to the input CSV file containing call data. |
 | `--utilization` | `1.0` | Agent utilization factor (e.g., 0.8 for 80%). |
-| `--format` | `TEXT` | Output format: `TEXT` or `JSON`. |
+| `--format` | `TEXT` | Output format: `TEXT`, `JSON`, or `UI`. |
 | `--capacity` | `0` | Maximum total agents allowed per hour. `0` indicates infinite capacity. |
 
 ### Input CSV Format

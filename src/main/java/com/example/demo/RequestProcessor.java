@@ -41,7 +41,7 @@ public class RequestProcessor {
             }
             double callsPerHour = (double) totalCalls / activHours;
             int agents = (int) Math.ceil((callsPerHour * avgDuration) / 3600.0 * utilization);
-            for (int hour = startHour; hour <= endHour; hour++) {
+            for (int hour = startHour; hour < endHour; hour++) {
                 batchResult.putIfAbsent(hour, ImmutableList.builder());
                 batchResult.get(hour).add(new AllocationRequest(customer, agents, priority));
             }
@@ -55,7 +55,7 @@ public class RequestProcessor {
 
     private int parseTime(String time) {
         time = time.trim().toUpperCase();
-        int hour = Integer.parseInt(time.replaceAll("[^0-9]", ""));
+        int hour = Integer.parseInt(time.split(":")[0].replaceAll("[^0-9]", ""));
         if (time.contains("PM") && hour < 12) hour += 12;
         if (time.contains("AM") && hour == 12) hour = 0;
         return hour;

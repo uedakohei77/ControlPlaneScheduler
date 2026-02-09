@@ -88,6 +88,10 @@ public class PersistentStorage implements Storage {
                     out.writeUTF(allocation.getKey());
                     out.writeInt(allocation.getValue());
                 }
+                for (Map.Entry<String, Integer> demand : entry.demands().entrySet()) {
+                    out.writeUTF(demand.getKey());
+                    out.writeInt(demand.getValue());
+                }
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -112,7 +116,13 @@ public class PersistentStorage implements Storage {
                     int agents = in.readInt();
                     allocations.put(customer, agents);
                 }
-                scheduleBuilder.add(new ScheduleBucket(hour, totalAgents, allocations));
+                Map<String, Integer> demands = new LinkedHashMap<>();
+                for (int k = 0; k < allocationCount; k++) {
+                    String customer = in.readUTF();
+                    int agents = in.readInt();
+                    demands.put(customer, agents);
+                }
+                scheduleBuilder.add(new ScheduleBucket(hour, totalAgents, allocations, demands));
             }
         } catch (Exception e) {
             e.printStackTrace();

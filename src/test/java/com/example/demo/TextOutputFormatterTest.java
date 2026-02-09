@@ -38,7 +38,7 @@ class TextOutputFormatterTest {
 
     @Test
     void testPrint_SingleBucket_NoAgents() {
-        ScheduleBucket bucket = new ScheduleBucket(9, 0, Collections.emptyMap());
+        ScheduleBucket bucket = new ScheduleBucket(9, 0, Collections.emptyMap(), Collections.emptyMap());
         formatter.print(List.of(bucket));
         assertEquals("09:00 : total=0; none" + System.lineSeparator(), outContent.toString());
     }
@@ -48,7 +48,7 @@ class TextOutputFormatterTest {
         Map<String, Integer> allocations = new LinkedHashMap<>();
         allocations.put("A", 1);
         allocations.put("B", 2);
-        ScheduleBucket bucket = new ScheduleBucket(10, 3, allocations);
+        ScheduleBucket bucket = new ScheduleBucket(10, 3, allocations, allocations);
 
         formatter.print(List.of(bucket));
         assertEquals("10:00 : total=3; A=1, B=2" + System.lineSeparator(), outContent.toString());
@@ -56,11 +56,11 @@ class TextOutputFormatterTest {
 
     @Test
     void testPrint_MultipleBuckets() {
-        ScheduleBucket bucket1 = new ScheduleBucket(9, 0, Collections.emptyMap());
+        ScheduleBucket bucket1 = new ScheduleBucket(9, 0, Collections.emptyMap(), Collections.emptyMap());
         
         Map<String, Integer> allocations = new LinkedHashMap<>();
         allocations.put("A", 5);
-        ScheduleBucket bucket2 = new ScheduleBucket(10, 5, allocations);
+        ScheduleBucket bucket2 = new ScheduleBucket(10, 5, allocations, allocations);
 
         formatter.print(List.of(bucket1, bucket2));
         

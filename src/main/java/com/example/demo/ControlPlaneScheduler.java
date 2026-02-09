@@ -92,7 +92,8 @@ public class ControlPlaneScheduler {
             }
             CompletableFuture.allOf(reduceFutures.toArray(new CompletableFuture[0])).join();
             for (CompletableFuture<ScheduleBucket> future : reduceFutures) {
-                schedule.add(future.join());
+                ScheduleBucket bucket = future.join();
+                schedule.add(bucket);
             }
             Collections.sort(schedule);
 
@@ -101,7 +102,19 @@ public class ControlPlaneScheduler {
             reduceExecutor.shutdown();
         }
         // Step 3: Show output 
-        OutputFormatter formatter = (outputFormat == OutputFormat.JSON) ? new JsonOutputFormatter() : new TextOutputFormatter();
+        OutputFormatter formatter;
+        switch (outputFormat) {
+            case JSON:
+                formatter = new JsonOutputFormatter();
+                break;
+            case UI:
+                formatter = new UiOutputFormatter();
+                break;
+            default:
+                formatter = new TextOutputFormatter();
+                break;
+        }
+        formatter.setCapacity(capacity);
         formatter.print(schedule);
     }
 }

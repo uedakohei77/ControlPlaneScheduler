@@ -9,14 +9,32 @@ import java.util.Map;
 public record ScheduleBucket(
     int hour,
     int totalAgents,
-    Map<String, Integer> allocations // Customer -> Number of agents
+    Map<String, Integer> allocations, // Customer -> Number of agents allocated
+    Map<String, Integer> demands
 ) implements Comparable<ScheduleBucket> {
     public ScheduleBucket {
         allocations = ImmutableMap.copyOf(allocations);
+        demands = ImmutableMap.copyOf(demands);
+    }
+
+    public String getHourFormatted() {
+        return String.format("%02d:00", hour);
     }
 
     public boolean isEmpty() {
         return totalAgents == 0;
+    }
+
+    public int totalAllocated() {
+        return allocations.values().stream().mapToInt(Integer::intValue).sum();
+    }
+
+    public boolean isThrottled(String customer) {
+        return demands.getOrDefault(customer, 0) > allocations.getOrDefault(customer, 0);
+    }
+
+    public boolean isAnyThrottled() {
+        return demands.keySet().stream().anyMatch(this::isThrottled);
     }
 
     @Override

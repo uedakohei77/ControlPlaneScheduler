@@ -10,12 +10,13 @@ public class Constants {
     public static final String PRIORITY = "Priority";
     public static final String SCHEDULE_FILE_PREFIX = "schedule";
     public static final String INTERMEDIATE_FILE_PREFIX = "intermediate";
+    public static final String HTLM_FILE_NAME = "scheduler_report.html";
 
     /** The output format. */
     enum OutputFormat {
         TEXT,
         JSON,
-        CSV
+        UI
     }
 
 }

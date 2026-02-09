@@ -53,11 +53,10 @@ class RequestProcessorTest {
 
         processor.processRequest(Collections.singletonList(record));
 
-        // Should be called for 10, 11, and 12
+        // Should be called for 10 and 11 (exclusive of 12)
         verify(storage).storeIntermediateData(eq(10), anyList());
         verify(storage).storeIntermediateData(eq(11), anyList());
-        verify(storage).storeIntermediateData(eq(12), anyList());
-        verify(storage, times(3)).storeIntermediateData(anyInt(), anyList());
+        verify(storage, times(2)).storeIntermediateData(anyInt(), anyList());
     }
 
     @Test
@@ -67,9 +66,9 @@ class RequestProcessorTest {
 
         processor.processRequest(Collections.singletonList(record));
 
-        // Should cover 0 (12 AM) to 13 (1 PM)
+        // Should cover 0 (12 AM) to 12 (1 PM exclusive)
         verify(storage).storeIntermediateData(eq(0), anyList());
-        verify(storage).storeIntermediateData(eq(13), anyList());
+        verify(storage).storeIntermediateData(eq(12), anyList());
     }
 
     @Test
@@ -94,29 +93,16 @@ class RequestProcessorTest {
         assertEquals("CustomerC", requests10.get(1).customer());
         assertEquals(2, requests10.get(1).agents());
 
-        // Hour 11: CustomerA (10-11), CustomerB (11-12), CustomerC (10-12)
+        // Hour 11: CustomerB (11-12), CustomerC (10-12)
         @SuppressWarnings("unchecked")
         ArgumentCaptor<List<AllocationRequest>> captor11 = ArgumentCaptor.forClass(List.class);
         verify(storage).storeIntermediateData(eq(11), captor11.capture());
         List<AllocationRequest> requests11 = captor11.getValue();
-        assertEquals(3, requests11.size());
-        assertEquals("CustomerA", requests11.get(0).customer());
-        assertEquals(1, requests11.get(0).agents());
-        assertEquals("CustomerB", requests11.get(1).customer());
+        assertEquals(2, requests11.size());
+        assertEquals("CustomerB", requests11.get(0).customer());
+        assertEquals(2, requests11.get(0).agents());
+        assertEquals("CustomerC", requests11.get(1).customer());
         assertEquals(2, requests11.get(1).agents());
-        assertEquals("CustomerC", requests11.get(2).customer());
-        assertEquals(2, requests11.get(2).agents());
-
-        // Hour 12: CustomerB (11-12), CustomerC (10-12)
-        @SuppressWarnings("unchecked")
-        ArgumentCaptor<List<AllocationRequest>> captor12 = ArgumentCaptor.forClass(List.class);
-        verify(storage).storeIntermediateData(eq(12), captor12.capture());
-        List<AllocationRequest> requests12 = captor12.getValue();
-        assertEquals(2, requests12.size());
-        assertEquals("CustomerB", requests12.get(0).customer());
-        assertEquals(2, requests12.get(0).agents());
-        assertEquals("CustomerC", requests12.get(1).customer());
-        assertEquals(2, requests12.get(1).agents());
     }
 
     private NamedCsvRecord createRecord(String customer, String numCalls, String avgDuration, String priority, String startTime, String endTime) {
