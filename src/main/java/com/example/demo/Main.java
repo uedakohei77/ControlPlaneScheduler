@@ -23,6 +23,10 @@ public class Main implements Callable<Integer> {
 
     @Override
     public Integer call() throws Exception {
+        if (utilization <= 0 || utilization > 1.0f) {
+            System.err.println("Error: Utilization must be between 0 (exclusive) and 1 (inclusive).");
+            return 1;
+        }
         ControlPlaneScheduler scheduler = new ControlPlaneScheduler(inputFile, utilization, outputFormat, capacity);
         scheduler.run();
 

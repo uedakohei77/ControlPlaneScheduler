@@ -4,6 +4,7 @@ import com.example.demo.Constants.OutputFormat;
 import com.google.common.collect.ImmutableList;
 import de.siegmar.fastcsv.reader.CsvReader;
 import de.siegmar.fastcsv.reader.NamedCsvRecord;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDate;
@@ -40,12 +41,17 @@ public class ControlPlaneScheduler {
         // Check the previous calculation.
         List<ScheduleBucket> schedule = storage.fetchSchedule();
         if (schedule.isEmpty()) {
+            Path path = Paths.get(inputFile);
+            if (!Files.exists(path)) {
+                System.err.println("Input file does not exist: " + inputFile);
+                return;
+            }
+
             schedule = new ArrayList<>();
             ExecutorService mapExecutor = Executors.newFixedThreadPool(INITIAL_THREAD_POOL_SIZE);
 
             // Step 1: Read CSV data from the input. And pass it to RequestProcessor.
             System.out.println("Processing file: " + inputFile);
-            Path path = Paths.get(inputFile);
             try (CsvReader<NamedCsvRecord> reader = CsvReader.builder().ofNamedCsvRecord(path)) {
                 int count = 0;
                 ImmutableList.Builder<NamedCsvRecord> builder = ImmutableList.builderWithExpectedSize(BATCH_SIZE);
