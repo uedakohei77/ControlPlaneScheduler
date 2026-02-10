@@ -1,6 +1,7 @@
 package com.example.demo;
 
 import com.example.demo.Constants.OutputFormat;
+import com.example.demo.Constants.StorageType;
 import com.google.common.collect.ImmutableList;
 import de.siegmar.fastcsv.reader.CsvReader;
 import de.siegmar.fastcsv.reader.NamedCsvRecord;
@@ -16,7 +17,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class ControlPlaneScheduler {
-    private static final int BATCH_SIZE = 100;
+    private static final int BATCH_SIZE = 10000;
     private static final int INITIAL_THREAD_POOL_SIZE = 4;
 
     private final String inputFile;
@@ -25,11 +26,19 @@ public class ControlPlaneScheduler {
     private final int capacity;
     private final Storage storage;
 
-    public ControlPlaneScheduler(String inputFile, float utilization, OutputFormat outputFormat, int capacity) {
-        this(inputFile, utilization, outputFormat, capacity, new PersistentStorage(LocalDate.now()));
-    }
-
-    public ControlPlaneScheduler(String inputFile, float utilization, OutputFormat outputFormat, int capacity, Storage storage) {
+    public ControlPlaneScheduler(String inputFile, float utilization, OutputFormat outputFormat, int capacity, StorageType storageType) {
+        Storage storage;
+        switch (storageType) {
+            case FILESYSTEM:
+                storage = new PersistentStorage(LocalDate.now());
+                break;
+            case MEMORY:
+                storage = new InMemoryStorage();
+                break;
+            default:
+                storage = new InMemoryStorage();
+                break;
+        } 
         this.inputFile = inputFile;
         this.utilization = utilization;
         this.outputFormat = outputFormat;
@@ -67,6 +76,13 @@ public class ControlPlaneScheduler {
                         }, mapExecutor));
                         builder = ImmutableList.builderWithExpectedSize(BATCH_SIZE);
                         count = 0;
+                        // Optimization: Check if we have too many active tasks
+                        if (futures.size() > INITIAL_THREAD_POOL_SIZE * 2) {
+                            // Wait for one to finish before reading more lines
+                            CompletableFuture.anyOf(futures.toArray(new CompletableFuture[0])).join();
+                            // Clean up finished futures to free memory
+                            futures.removeIf(CompletableFuture::isDone);
+                        }
                     }
                 }
                 if (count > 0) {

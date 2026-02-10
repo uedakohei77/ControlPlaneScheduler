@@ -48,8 +48,6 @@ public class CallOrchestrator {
             demands.merge(request.customer(), request.agents(), Integer::sum);
         }
 
-        if (priorityGroups.isEmpty()) {
-        }
         int remainingCapacty = capacity;
         int totalAllocated = 0;
 

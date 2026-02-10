@@ -1,6 +1,7 @@
 package com.example.demo;
 
 import com.example.demo.Constants.OutputFormat;
+import com.example.demo.Constants.StorageType;
 import java.util.concurrent.Callable;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
@@ -21,13 +22,17 @@ public class Main implements Callable<Integer> {
     @Option(names = {"--capacity"}, defaultValue = "0", description = "The capacity of the agent. Zero means unlimited capacity.")
     private int capacity;
 
+    @Option(names = {"--storage"}, defaultValue = "MEMORY", description = "The storage type.")
+    private StorageType storageType;
+
+
     @Override
     public Integer call() throws Exception {
         if (utilization <= 0 || utilization > 1.0f) {
             System.err.println("Error: Utilization must be between 0 (exclusive) and 1 (inclusive).");
             return 1;
         }
-        ControlPlaneScheduler scheduler = new ControlPlaneScheduler(inputFile, utilization, outputFormat, capacity);
+        ControlPlaneScheduler scheduler = new ControlPlaneScheduler(inputFile, utilization, outputFormat, capacity, storageType);
         scheduler.run();
 
         return 0;

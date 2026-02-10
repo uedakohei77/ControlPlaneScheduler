@@ -19,4 +19,8 @@ public class Constants {
         UI
     }
 
+    enum StorageType {
+        MEMORY,
+        FILESYSTEM
+    }
 }
