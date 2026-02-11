@@ -41,6 +41,7 @@ java -cp target/classes:target/dependency/* com.example.demo.Main [OPTIONS]
 | `--utilization` | `1.0` | Agent utilization factor (e.g., 0.8 for 80%). |
 | `--format` | `TEXT` | Output format: `TEXT`, `JSON`, or `UI`. |
 | `--capacity` | `0` | Maximum total agents allowed per hour. `0` indicates infinite capacity. |
+| `--storage` | `MEMORY` | Storage type: `MEMORY` or `FILESYSTEM`. |
 
 ### Input CSV Format
 
@@ -73,9 +74,15 @@ java -cp target/classes:target/dependency/* com.example.demo.Main --input data.c
 java -cp target/classes:target/dependency/* com.example.demo.Main --input data.csv --capacity 50
 ```
 
+**4. Filesystem Storage (For larger datasets)**
+```bash
+java -cp target/classes:target/dependency/* com.example.demo.Main --input data.csv --storage FILESYSTEM
+```
+
 ## Project Structure
 
 *   `ControlPlaneScheduler`: Main orchestration logic.
 *   `RequestProcessor`: Parses CSV and calculates raw demand.
 *   `CallOrchestrator`: Applies capacity and priority logic.
-*   `PersistentStorage`: Handles intermediate binary storage for scalability.
+*   `InMemoryStorage`: Default in-memory storage for fast processing of smaller datasets (<1M rows). 
+*   `PersistentStorage`: Disk-based storage for handling large datasets efficiently.
