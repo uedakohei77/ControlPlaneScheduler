@@ -2,6 +2,7 @@ package com.example.demo;
 
 import com.example.demo.Constants.OutputFormat;
 import com.example.demo.Constants.StorageType;
+import com.google.common.base.Stopwatch;
 import com.google.common.collect.ImmutableList;
 import de.siegmar.fastcsv.reader.CsvReader;
 import de.siegmar.fastcsv.reader.NamedCsvRecord;
@@ -12,6 +13,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -25,9 +27,11 @@ public class ControlPlaneScheduler {
     private final OutputFormat outputFormat;
     private final int capacity;
     private final Storage storage;
+    private final boolean verbose;
+    private final boolean skipOutput;
 
-    public ControlPlaneScheduler(String inputFile, float utilization, OutputFormat outputFormat, int capacity, StorageType storageType) {
-        this(inputFile, utilization, outputFormat, capacity, createStorage(storageType));
+    public ControlPlaneScheduler(String inputFile, float utilization, OutputFormat outputFormat, int capacity, StorageType storageType, boolean verbose, boolean skipOutput) {
+        this(inputFile, utilization, outputFormat, capacity, createStorage(storageType), verbose, skipOutput);
     }
 
     private static Storage createStorage(StorageType storageType) {
@@ -40,12 +44,14 @@ public class ControlPlaneScheduler {
         }
     }
 
-    public ControlPlaneScheduler(String inputFile, float utilization, OutputFormat outputFormat, int capacity, Storage storage) {
+    public ControlPlaneScheduler(String inputFile, float utilization, OutputFormat outputFormat, int capacity, Storage storage, boolean verbose, boolean skipOutput) {
         this.inputFile = inputFile;
         this.utilization = utilization;
         this.outputFormat = outputFormat;
         this.capacity = capacity;
         this.storage = storage;
+        this.verbose = verbose;
+        this.skipOutput = skipOutput;
     }
 
     public void run() {
@@ -60,6 +66,11 @@ public class ControlPlaneScheduler {
 
             schedule = new ArrayList<>();
             ExecutorService mapExecutor = Executors.newFixedThreadPool(INITIAL_THREAD_POOL_SIZE);
+
+            if (verbose) {
+                System.out.println("Starting Step 1: Processing CSV...");
+            }
+            Stopwatch stopwatch = Stopwatch.createStarted();
 
             // Step 1: Read CSV data from the input. And pass it to RequestProcessor.
             System.out.println("Processing file: " + inputFile);
@@ -102,9 +113,16 @@ public class ControlPlaneScheduler {
                 System.out.println("Filed to read data.");
                 e.printStackTrace();
             }
+            if (verbose) {
+                System.out.println("Step 1 completed in " + stopwatch.elapsed(TimeUnit.MILLISECONDS) + " ms");
+            }
             mapExecutor.shutdown();
 
             // Step 2: Aggregate intermediate requests into ScheduleBucket per hour.
+            if (verbose) {
+                System.out.println("Starting Step 2: Aggregating buckets...");
+            }
+            stopwatch.reset().start();
             ExecutorService reduceExecutor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
             List<CompletableFuture<ScheduleBucket>> reduceFutures = new ArrayList<>();
             for (int h = 0; h < 24; h++) {
@@ -120,12 +138,18 @@ public class ControlPlaneScheduler {
                 schedule.add(bucket);
             }
             Collections.sort(schedule);
+            if (verbose) {
+                System.out.println("Step 2 completed in " + stopwatch.elapsed(TimeUnit.MILLISECONDS) + " ms");
+            }
 
             storage.storeSchedule(schedule);
             storage.cleanupIntermediateFiles();
             reduceExecutor.shutdown();
         }
         // Step 3: Show output 
+        if (skipOutput) {
+            return;
+        }
         OutputFormatter formatter;
         switch (outputFormat) {
             case JSON:

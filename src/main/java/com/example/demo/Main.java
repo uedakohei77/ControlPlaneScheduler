@@ -25,6 +25,12 @@ public class Main implements Callable<Integer> {
     @Option(names = {"--storage"}, defaultValue = "MEMORY", description = "The storage type.")
     private StorageType storageType;
 
+    @Option(names = {"--verbose"}, defaultValue = "false", description = "Enable verbose logging for benchmarking.")
+    private boolean verbose;
+
+    @Option(names = {"--skip-output"}, defaultValue = "false", description = "Skip printing the output.")
+    private boolean skipOutput;
+
 
     @Override
     public Integer call() throws Exception {
@@ -32,7 +38,7 @@ public class Main implements Callable<Integer> {
             System.err.println("Error: Utilization must be between 0 (exclusive) and 1 (inclusive).");
             return 1;
         }
-        ControlPlaneScheduler scheduler = new ControlPlaneScheduler(inputFile, utilization, outputFormat, capacity, storageType);
+        ControlPlaneScheduler scheduler = new ControlPlaneScheduler(inputFile, utilization, outputFormat, capacity, storageType, verbose, skipOutput);
         scheduler.run();
 
         return 0;

@@ -9,11 +9,12 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDate;
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -25,7 +26,7 @@ public class PersistentStorage implements Storage {
 
     private String schedulePath = "";
     private AtomicInteger intermediateFileIndex = new AtomicInteger(0);
-    private Map<Integer, List<String>> intermediateFileMap = new HashMap<>();
+    private Map<Integer, List<String>> intermediateFileMap = new ConcurrentHashMap<>();
     private LocalDate date;
     private final String outputDir;
 
@@ -50,8 +51,8 @@ public class PersistentStorage implements Storage {
             e.printStackTrace();
             return;
         }
-        intermediateFileMap.putIfAbsent(index, new LinkedList<>());
-        intermediateFileMap.get(index).add(path.toString());
+        intermediateFileMap.computeIfAbsent(index, k -> Collections.synchronizedList(new LinkedList<>()))
+                .add(path.toString());
     }
 
     public List<AllocationRequest> fetchInterMediateData(int index) {
@@ -61,6 +62,9 @@ public class PersistentStorage implements Storage {
         }
         for (String file : intermediateFileMap.get(index)) {
             Path path = Paths.get(file);
+            if (!Files.exists(path)) {
+                continue;
+            }
             try (DataInputStream in = new DataInputStream(new BufferedInputStream(Files.newInputStream(path)))) {
                 while (in.available() > 0) {
                     String customer = in.readUTF();
@@ -104,6 +108,9 @@ public class PersistentStorage implements Storage {
             return scheduleBuilder.build();
         }
         Path path = Paths.get(schedulePath);
+        if (!Files.exists(path)) {
+            return scheduleBuilder.build();
+        }
         try (DataInputStream in = new DataInputStream(new BufferedInputStream(Files.newInputStream(path)))) {
             int count = in.readInt();
             for (int i = 0; i < count; i++) {

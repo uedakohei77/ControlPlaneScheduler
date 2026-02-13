@@ -60,7 +60,7 @@ class ControlPlaneSchedulerEndToEndTest {
 
         // 3. Run Scheduler
         PersistentStorage storage = new PersistentStorage(LocalDate.now(), tempDir.toString());
-        ControlPlaneScheduler scheduler = new ControlPlaneScheduler(inputCsv.toString(), 0.8f, OutputFormat.JSON, 0, storage);
+        ControlPlaneScheduler scheduler = new ControlPlaneScheduler(inputCsv.toString(), 0.8f, OutputFormat.JSON, 0, storage, false, false);
         scheduler.run();
 
         // 4. Verify Output
@@ -104,7 +104,7 @@ class ControlPlaneSchedulerEndToEndTest {
 
         // 3. Run Scheduler
         PersistentStorage storage = new PersistentStorage(LocalDate.now(), tempDir.toString());
-        ControlPlaneScheduler scheduler = new ControlPlaneScheduler(inputCsv.toString(), 1.0f, OutputFormat.JSON, 15, storage);
+        ControlPlaneScheduler scheduler = new ControlPlaneScheduler(inputCsv.toString(), 1.0f, OutputFormat.JSON, 15, storage, false, false);
         scheduler.run();
 
         // 4. Verify Output
