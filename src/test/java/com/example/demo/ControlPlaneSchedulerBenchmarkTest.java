@@ -22,8 +22,8 @@ class ControlPlaneSchedulerBenchmarkTest {
     void testBenchmark_InMemory() throws IOException {
         System.out.println("Generating CSV for In-Memory Benchmark...");
         Path inputCsv = generateLargeCsv("benchmark_memory.csv", 10_000_000);
-        
         System.out.println("=== Benchmark: In-Memory Storage ===");
+        
         Storage storage = new InMemoryStorage();
         // verbose = true to show timing logs
         ControlPlaneScheduler scheduler = new ControlPlaneScheduler(

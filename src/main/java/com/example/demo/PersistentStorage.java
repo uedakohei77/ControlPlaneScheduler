@@ -3,6 +3,7 @@ package com.example.demo;
 import com.google.common.collect.ImmutableList;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
+import java.io.EOFException;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.nio.file.Files;
@@ -72,6 +73,8 @@ public class PersistentStorage implements Storage {
                     int priority = in.readInt();
                     request.add(new AllocationRequest(customer, agents, priority));
                 }
+            } catch (EOFException e) {
+                // End of file reached.
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -131,6 +134,8 @@ public class PersistentStorage implements Storage {
                 }
                 scheduleBuilder.add(new ScheduleBucket(hour, totalAgents, allocations, demands));
             }
+        } catch (EOFException e) {
+            // End of file reached.
         } catch (Exception e) {
             e.printStackTrace();
         }
