@@ -27,18 +27,20 @@ public class ControlPlaneScheduler {
     private final Storage storage;
 
     public ControlPlaneScheduler(String inputFile, float utilization, OutputFormat outputFormat, int capacity, StorageType storageType) {
-        Storage storage;
+        this(inputFile, utilization, outputFormat, capacity, createStorage(storageType));
+    }
+
+    private static Storage createStorage(StorageType storageType) {
         switch (storageType) {
             case FILESYSTEM:
-                storage = new PersistentStorage(LocalDate.now());
-                break;
+                return new PersistentStorage(LocalDate.now());
             case MEMORY:
-                storage = new InMemoryStorage();
-                break;
             default:
-                storage = new InMemoryStorage();
-                break;
-        } 
+                return new InMemoryStorage();
+        }
+    }
+
+    public ControlPlaneScheduler(String inputFile, float utilization, OutputFormat outputFormat, int capacity, Storage storage) {
         this.inputFile = inputFile;
         this.utilization = utilization;
         this.outputFormat = outputFormat;
