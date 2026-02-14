@@ -26,24 +26,28 @@ public class RequestProcessor {
         // Hour -> (CustomerName -> AgentCount)
         Map<Integer, ImmutableList.Builder<AllocationRequest>> batchResult = new HashMap<>();
         for (NamedCsvRecord record : request) {
-            String customer = record.getField(CUSTOMER_COLUMN);
-            int totalCalls = Integer.parseInt(record.getField(NUM_CALLS).trim());
-            int avgDuration = Integer.parseInt(record.getField(AVG_CALL_DURATION_SEC).trim());
-            int priority = Integer.parseInt(record.getField(PRIORITY).trim());
-            String startTime = record.getField(START_TIME);
-            String endTime = record.getField(END_TIME);
-            int startHour = parseTime(startTime);
-            int endHour = parseTime(endTime);
+            try {
+                String customer = record.getField(CUSTOMER_COLUMN);
+                int totalCalls = Integer.parseInt(record.getField(NUM_CALLS).trim());
+                int avgDuration = Integer.parseInt(record.getField(AVG_CALL_DURATION_SEC).trim());
+                int priority = Integer.parseInt(record.getField(PRIORITY).trim());
+                String startTime = record.getField(START_TIME);
+                String endTime = record.getField(END_TIME);
+                int startHour = parseTime(startTime);
+                int endHour = parseTime(endTime);
 
-            int activHours = endHour - startHour;
-            if (activHours <= 0) {
-                continue;
-            }
-            double callsPerHour = (double) totalCalls / activHours;
-            int agents = (int) Math.ceil((callsPerHour * avgDuration) / 3600.0 * utilization);
-            for (int hour = startHour; hour < endHour; hour++) {
-                batchResult.putIfAbsent(hour, ImmutableList.builder());
-                batchResult.get(hour).add(new AllocationRequest(customer, agents, priority));
+                int activHours = endHour - startHour;
+                if (activHours <= 0) {
+                    continue;
+                }
+                double callsPerHour = (double) totalCalls / activHours;
+                int agents = (int) Math.ceil((callsPerHour * avgDuration) / 3600.0 * utilization);
+                for (int hour = startHour; hour < endHour; hour++) {
+                    batchResult.putIfAbsent(hour, ImmutableList.builder());
+                    batchResult.get(hour).add(new AllocationRequest(customer, agents, priority));
+                }
+            } catch (Exception e) {
+                System.err.println("Skipping invalid record: " + record + " Error: " + e.getMessage());
             }
         }
         if (!batchResult.isEmpty()) {

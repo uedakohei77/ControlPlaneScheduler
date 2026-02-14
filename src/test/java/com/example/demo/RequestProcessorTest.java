@@ -105,6 +105,25 @@ class RequestProcessorTest {
         assertEquals(2, requests11.get(1).agents());
     }
 
+    @Test
+    void testProcessRequest_InvalidRecord() {
+        // Valid record
+        NamedCsvRecord validRecord = createRecord("CustomerA", "10", "360", "1", "10 AM", "11 AM");
+        // Invalid record (NumberFormatException for calls)
+        NamedCsvRecord invalidRecord = createRecord("CustomerB", "invalid", "360", "1", "10 AM", "11 AM");
+
+        processor.processRequest(List.of(validRecord, invalidRecord));
+
+        // Should process the valid one
+        @SuppressWarnings("unchecked")
+        ArgumentCaptor<List<AllocationRequest>> captor = ArgumentCaptor.forClass(List.class);
+        verify(storage).storeIntermediateData(eq(10), captor.capture());
+
+        List<AllocationRequest> requests = captor.getValue();
+        assertEquals(1, requests.size());
+        assertEquals("CustomerA", requests.get(0).customer());
+    }
+
     private NamedCsvRecord createRecord(String customer, String numCalls, String avgDuration, String priority, String startTime, String endTime) {
         String headers = String.join(",", Constants.CUSTOMER_COLUMN, Constants.NUM_CALLS, Constants.AVG_CALL_DURATION_SEC, Constants.PRIORITY, Constants.START_TIME, Constants.END_TIME);
         String values = String.join(",", customer, numCalls, avgDuration, priority, startTime, endTime);
