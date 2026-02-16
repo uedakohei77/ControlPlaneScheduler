@@ -65,23 +65,28 @@ public class CallOrchestrator {
                 remainingCapacty -= tierDemand;
                 totalAllocated += tierDemand;
             } else {
-                // Fair share allocation
+                // Return if there is no capacity left.
                 if (remainingCapacty <= 0) {
                     break;
                 }
                 double ratio = (double) remainingCapacty / tierDemand;
                 int allocatedInTier = 0;
+                Map<AllocationRequest, Double> roundingLoss = new LinkedHashMap<>();
+                // Pass 1: Floor distribution
                 for (AllocationRequest request : tierRequests) {
-                    int share = (int) Math.floor(request.agents() * ratio);
-                    allocations.merge(request.customer(), share, Integer::sum);
-                    allocatedInTier += share;
+                    double exactShare = request.agents() * ratio;
+                    int flooredShare = (int) Math.floor(exactShare);
+                    allocations.merge(request.customer(), flooredShare, Integer::sum);
+                    allocatedInTier += flooredShare;
+                    roundingLoss.put(request, exactShare - flooredShare);
                 }
-                // Second pass: Distribute rounding leftovers.
+                // Pass 2: Distribute leftovers based on who lost the most value.
                 // Allocate for largest remaining first.
                 int leftovers = remainingCapacty - allocatedInTier;
-                tierRequests.sort((a, b) -> Integer.compare(b.agents(), a.agents()));
+                tierRequests.sort((a, b) -> Double.compare(roundingLoss.get(b), roundingLoss.get(a)));
 
                 for (int i = 0; i < leftovers; i++) {
+                    // Using modulo is safe if leftovers > tierRequests.size()
                     AllocationRequest request = tierRequests.get(i % tierRequests.size());
                     allocations.merge(request.customer(), 1, Integer::sum);
                 }
@@ -91,8 +96,6 @@ public class CallOrchestrator {
                 break;
             }
         }
-
         return new ScheduleBucket(hour, totalAllocated, allocations, demands);
     }
-
 }
