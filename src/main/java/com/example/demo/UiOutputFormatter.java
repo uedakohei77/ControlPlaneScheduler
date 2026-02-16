@@ -83,9 +83,10 @@ public class UiOutputFormatter implements OutputFormatter {
 
             // 4. Drill-down Table
             html.append("<div class='table-container'><table>");
-            html.append("<tr><th>Customer</th><th>Required</th><th>Allocated</th><th>Gap</th></tr>");
+            html.append("<tr><th>Customer</th><th>Priority</th><th>Required</th><th>Allocated</th><th>Gap</th></tr>");
             
             for (Map.Entry<String, Integer> entry : bucket.allocations().entrySet()) {
+                int priority = bucket.priorityMap().getOrDefault(entry.getKey(), -1);
                 int allocation = entry.getValue();
                 int demand = bucket.demands().getOrDefault(entry.getKey(), 0);
                 int gap = demand - allocation;
@@ -93,6 +94,7 @@ public class UiOutputFormatter implements OutputFormatter {
 
                 html.append("<tr>");
                 html.append("<td>" + entry.getKey() + "</td>");
+                html.append("<td>" + priority + "</td>");
                 html.append("<td>" + demand + "</td>");
                 html.append("<td>" + allocation + "</td>");
                 html.append("<td class='" + gapClass + "'>" + (gap > 0 ? "-" + gap : "0") + "</td>");

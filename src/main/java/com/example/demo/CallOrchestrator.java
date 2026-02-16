@@ -26,19 +26,22 @@ public class CallOrchestrator {
                 hour,
                 0,
                 java.util.Collections.emptyMap(),
+                java.util.Collections.emptyMap(),
                 java.util.Collections.emptyMap());
         }
 
         Map<String, Integer> allocations = new LinkedHashMap<>();
+        Map<String, Integer> priorityMap = new LinkedHashMap<>();
         if (capacity <= 0) {
             // Infinite capacity
             int totalAgents = 0;
             requests.sort(AllocationRequest::compareTo);
             for (AllocationRequest request : requests) {
                 allocations.merge(request.customer(), request.agents(), Integer::sum);
+                priorityMap.put(request.customer(), request.priority());
                 totalAgents += request.agents();
             }
-            return new ScheduleBucket(hour, totalAgents, allocations, allocations);
+            return new ScheduleBucket(hour, totalAgents, allocations, allocations, priorityMap);
         }
         // 1. Group all requests for this hour by priority
         Map<Integer, List<AllocationRequest>> priorityGroups = new TreeMap<>();
@@ -46,6 +49,7 @@ public class CallOrchestrator {
         for (AllocationRequest request : requests) {
             priorityGroups.computeIfAbsent(request.priority(), k -> new ArrayList<>()).add(request);
             demands.merge(request.customer(), request.agents(), Integer::sum);
+            priorityMap.put(request.customer(), request.priority());
         }
 
         int remainingCapacty = capacity;
@@ -96,6 +100,6 @@ public class CallOrchestrator {
                 break;
             }
         }
-        return new ScheduleBucket(hour, totalAllocated, allocations, demands);
+        return new ScheduleBucket(hour, totalAllocated, allocations, demands, priorityMap);
     }
 }

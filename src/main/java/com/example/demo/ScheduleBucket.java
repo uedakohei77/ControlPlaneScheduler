@@ -10,11 +10,13 @@ public record ScheduleBucket(
     int hour,
     int totalAgents,
     Map<String, Integer> allocations, // Customer -> Number of agents allocated
-    Map<String, Integer> demands
+    Map<String, Integer> demands,
+    Map<String, Integer> priorityMap
 ) implements Comparable<ScheduleBucket> {
     public ScheduleBucket {
         allocations = ImmutableMap.copyOf(allocations);
         demands = ImmutableMap.copyOf(demands);
+        priorityMap = ImmutableMap.copyOf(priorityMap);
     }
 
     public String getHourFormatted() {

@@ -80,8 +80,12 @@ class PersistentStorageTest {
         Map<String, Integer> allocations = new HashMap<>();
         allocations.put("CustomerA", 5);
         allocations.put("CustomerB", 10);
+        Map<String, Integer> priorityMap = new HashMap<>();
+        priorityMap.put("CustomerA", 1);
+        priorityMap.put("CustomerB", 2);
 
-        ScheduleBucket bucket = new ScheduleBucket(10, 15, allocations, allocations);
+        ScheduleBucket bucket =
+            new ScheduleBucket(10, 15, allocations, allocations, priorityMap);
         List<ScheduleBucket> schedule = new ArrayList<>();
         schedule.add(bucket);
 
@@ -100,7 +104,10 @@ class PersistentStorageTest {
         // 1. Store a valid schedule to set the internal schedulePath
         Map<String, Integer> allocations = new HashMap<>();
         allocations.put("CustomerA", 5);
-        ScheduleBucket bucket = new ScheduleBucket(10, 5, allocations, allocations);
+        Map<String, Integer> priorityMap = new HashMap<>();
+        priorityMap.put("CustomerA", 1);
+        ScheduleBucket bucket =
+            new ScheduleBucket(10, 5, allocations, allocations, priorityMap);
         List<ScheduleBucket> schedule = new ArrayList<>();
         schedule.add(bucket);
 

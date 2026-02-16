@@ -33,14 +33,18 @@ class UiOutputFormatterTest {
         alloc10.put("CustA", 10);
         Map<String, Integer> demand10 = new LinkedHashMap<>();
         demand10.put("CustA", 10);
-        ScheduleBucket bucket10 = new ScheduleBucket(10, 10, alloc10, demand10);
+        Map<String, Integer> priorityMap = new LinkedHashMap<>();
+        priorityMap.put("CustA", 1);
+        ScheduleBucket bucket10 = new ScheduleBucket(10, 10, alloc10, demand10, priorityMap);
 
         // Hour 11: Throttled (Demand 20, Alloc 10)
         Map<String, Integer> alloc11 = new LinkedHashMap<>();
         alloc11.put("CustB", 10);
         Map<String, Integer> demand11 = new LinkedHashMap<>();
         demand11.put("CustB", 20);
-        ScheduleBucket bucket11 = new ScheduleBucket(11, 10, alloc11, demand11);
+        Map<String, Integer> priorityMap11 = new LinkedHashMap<>();
+        priorityMap11.put("CustB", 2);
+        ScheduleBucket bucket11 = new ScheduleBucket(11, 10, alloc11, demand11, priorityMap11);
 
         formatter.setCapacity(50);
         String html = formatter.generateHtml(List.of(bucket10, bucket11));
@@ -55,8 +59,8 @@ class UiOutputFormatterTest {
         expected.append("<div style='color: #64748B'>Total Allocation: 10</div>");
         expected.append("<div class='badge badge-ok'>Healthy</div>");
         expected.append("</summary><div class='table-container'><table>");
-        expected.append("<tr><th>Customer</th><th>Required</th><th>Allocated</th><th>Gap</th></tr>");
-        expected.append("<tr><td>CustA</td><td>10</td><td>10</td><td class=''>0</td></tr>");
+        expected.append("<tr><th>Customer</th><th>Priority</th><th>Required</th><th>Allocated</th><th>Gap</th></tr>");
+        expected.append("<tr><td>CustA</td><td>1</td><td>10</td><td>10</td><td class=''>0</td></tr>");
         expected.append("</table></div></details>");
 
         // Bucket 11
@@ -65,8 +69,8 @@ class UiOutputFormatterTest {
         expected.append("<div style='color: #64748B'>Total Allocation: 10</div>");
         expected.append("<div class='badge badge-warn'>Demand Exceeded</div>");
         expected.append("</summary><div class='table-container'><table>");
-        expected.append("<tr><th>Customer</th><th>Required</th><th>Allocated</th><th>Gap</th></tr>");
-        expected.append("<tr><td>CustB</td><td>20</td><td>10</td><td class='unmet'>-10</td></tr>");
+        expected.append("<tr><th>Customer</th><th>Priority</th><th>Required</th><th>Allocated</th><th>Gap</th></tr>");
+        expected.append("<tr><td>CustB</td><td>2</td><td>20</td><td>10</td><td class='unmet'>-10</td></tr>");
         expected.append("</table></div></details>");
 
         expected.append("</div></body></html>");

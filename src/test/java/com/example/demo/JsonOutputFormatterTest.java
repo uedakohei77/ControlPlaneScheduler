@@ -41,7 +41,10 @@ class JsonOutputFormatterTest {
         Map<String, Integer> allocations = new LinkedHashMap<>();
         allocations.put("CustomerA", 5);
         allocations.put("CustomerB", 10);
-        ScheduleBucket bucket = new ScheduleBucket(10, 15, allocations, allocations);
+        Map<String, Integer> priorityMap = new LinkedHashMap<>();
+        priorityMap.put("CustomerA", 1);
+        priorityMap.put("CustomerB", 2);
+        ScheduleBucket bucket = new ScheduleBucket(10, 15, allocations, allocations, priorityMap);
 
         formatter.print(List.of(bucket));
 
@@ -61,11 +64,16 @@ class JsonOutputFormatterTest {
 
     @Test
     void testPrint_MultipleBuckets() {
-        ScheduleBucket bucket1 = new ScheduleBucket(10, 0, Collections.emptyMap(), Collections.emptyMap());
+        ScheduleBucket bucket1 =
+            new ScheduleBucket(
+                10, 0, Collections.emptyMap(), Collections.emptyMap(), Collections.emptyMap());
         
         Map<String, Integer> allocations2 = new LinkedHashMap<>();
         allocations2.put("CustomerC", 2);
-        ScheduleBucket bucket2 = new ScheduleBucket(11, 2, allocations2, allocations2);
+        Map<String, Integer> priorityMap2 = new LinkedHashMap<>();
+        priorityMap2.put("CustomerC", 1);
+        ScheduleBucket bucket2 =
+            new ScheduleBucket(11, 2, allocations2, allocations2, priorityMap2);
 
         formatter.print(List.of(bucket1, bucket2));
 
@@ -91,7 +99,10 @@ class JsonOutputFormatterTest {
     void testPrint_Escaping() {
         Map<String, Integer> allocations = new LinkedHashMap<>();
         allocations.put("Cust\"omer\\X", 1);
-        ScheduleBucket bucket = new ScheduleBucket(12, 1, allocations, allocations);
+        Map<String, Integer> priorityMap = new LinkedHashMap<>();
+        priorityMap.put("Cust\"omer\\X", 1);
+        ScheduleBucket bucket =
+            new ScheduleBucket(12, 1, allocations, allocations, priorityMap);
 
         formatter.print(List.of(bucket));
 
@@ -114,7 +125,10 @@ class JsonOutputFormatterTest {
         allocations.put("CustomerA", 5);
         Map<String, Integer> demands = new LinkedHashMap<>();
         demands.put("CustomerA", 10);
-        ScheduleBucket bucket = new ScheduleBucket(10, 5, allocations, demands);
+        Map<String, Integer> priorityMap = new LinkedHashMap<>();
+        priorityMap.put("CustomerA", 1);
+        ScheduleBucket bucket =
+            new ScheduleBucket(10, 5, allocations, demands, priorityMap);
 
         formatter.print(List.of(bucket));
 

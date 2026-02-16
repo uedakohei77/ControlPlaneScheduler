@@ -63,7 +63,11 @@ class InMemoryStorageTest {
     void testStoreAndFetchSchedule() {
         Map<String, Integer> allocations = new HashMap<>();
         allocations.put("CustomerA", 5);
-        ScheduleBucket bucket = new ScheduleBucket(10, 5, allocations, allocations);
+        Map<String, Integer> demands = new HashMap<>();
+        demands.put("CustomerA", 5);
+        Map<String, Integer> priorityMap = new HashMap<>();
+        priorityMap.put("CustomerA", 1);
+        ScheduleBucket bucket = new ScheduleBucket(10, 5, allocations, demands, priorityMap);
         List<ScheduleBucket> schedule = new ArrayList<>();
         schedule.add(bucket);
 
